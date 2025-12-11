@@ -1,0 +1,61 @@
+git init
+
+#copy and paste following into R, updating file name, x and y column names
+#ensure you setwd() the appropriate place for file import and export
+
+# Load required packages
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)  # for log scale minor breaks
+
+#-----------------------------------------
+# Read Excel file
+#-----------------------------------------
+df <- read_excel("yourfile.xlsx")
+
+# Optional: inspect
+head(df)
+names(df)
+
+#-----------------------------------------
+# Convert wide → long format for ggplot
+#-----------------------------------------
+df_long <- df %>% 
+  pivot_longer(
+    cols = c(REP1, REP2, REP3),   # your actual replicate columns
+    names_to = "Replicate",
+    values_to = "Intensity"
+  )
+
+#-----------------------------------------
+# Plot with log-spaced gridlines
+#-----------------------------------------
+p <- ggplot(df_long, aes(x = Size, y = Intensity, color = Replicate)) +
+  geom_line(size = 1.2) +
+
+  # ---- LOG10 AXIS WITH LOG-SPACED GRIDLINES ----
+  scale_x_log10(
+    breaks = 10^(0:5),                    # major ticks (1, 10, 100, ...)
+    minor_breaks = rep(1:9, 6) * 10^(0:5) # minor ticks within each decade
+  ) +
+
+  annotation_logticks(sides = "b") +      # log ticks at bottom
+
+  labs(
+    title = "Particle Size Distribution – Three Replicates",
+    x = "Diameter (nm, log10 scale)",
+    y = "Intensity (%)",
+    color = "Replicate"
+  ) +
+
+  theme_minimal(base_size = 14) +
+  theme(
+    panel.grid.minor = element_line(color = "grey85"),
+    panel.grid.major = element_line(color = "grey70"),
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  )
+
+# Print the plot
+print(p)
