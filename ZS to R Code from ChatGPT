@@ -1,5 +1,3 @@
-git init
-
 #copy and paste following into R, updating file name, x and y column names
 #ensure you setwd() the appropriate place for file import and export
 
