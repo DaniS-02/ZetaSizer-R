@@ -1,15 +1,6 @@
 #copy and paste following into R, updating file name, x and y column names
 #ensure you setwd() the appropriate place for file import and export
 
-#to download required packages:
-install.packages(c(
-  "readxl",
-  "dplyr",
-  "tidyr",
-  "ggplot2",
-  "scales"
-))
-
 # Load required packages
 library(readxl)
 library(dplyr)
