@@ -1,0 +1,122 @@
+library(readxl)
+library(dplyr)
+library(ggplot2)
+
+# ------------------------------------------------------------
+# Import Excel data
+# ------------------------------------------------------------
+
+dls_data <- read_excel(
+  "D:/DLSFiles.xlsx",
+  sheet = "Sheet2"
+)
+
+# ------------------------------------------------------------
+# Rename first column as Size
+# ------------------------------------------------------------
+
+names(dls_data)[1] <- "Size"
+
+# ------------------------------------------------------------
+# Make sure Size is numeric
+# ------------------------------------------------------------
+
+dls_data$Size <- as.numeric(dls_data$Size)
+
+# ------------------------------------------------------------
+# Remove invalid size values and sort
+# ------------------------------------------------------------
+
+dls_data <- dls_data %>%
+  filter(
+    !is.na(Size),
+    Size > 0
+  ) %>%
+  arrange(Size)
+
+# ------------------------------------------------------------
+# Get formulation column names
+# ------------------------------------------------------------
+
+formulations <- names(dls_data)[-1]
+
+# ------------------------------------------------------------
+# Create empty list to store graphs
+# ------------------------------------------------------------
+
+plots <- list()
+
+# ------------------------------------------------------------
+# Make one separate graph for each formulation
+# ------------------------------------------------------------
+
+# ------------------------------------------------------------
+# Make one separate graph for each formulation
+# ------------------------------------------------------------
+
+for (formulation in formulations) {
+  
+  plot_data <- dls_data %>%
+    select(
+      Size,
+      Intensity = all_of(formulation)
+    ) %>%
+    mutate(
+      Intensity = as.numeric(Intensity)
+    ) %>%
+    filter(!is.na(Intensity))
+  
+  p <- ggplot(
+    plot_data,
+    aes(
+      x = Size,
+      y = Intensity
+    )
+  ) +
+    geom_line(
+      linewidth = 1.2,
+      colour = "red"
+    ) +
+    
+    # X-axis: logarithmic, full range to 10,000 d.nm
+    scale_x_log10(
+      limits = c(1, 10000),
+      expand = expansion(mult = c(0, 0))
+    ) +
+    
+    # Y-axis: start exactly at zero
+    scale_y_continuous(
+      limits = c(0, NA),
+      expand = expansion(mult = c(0, 0.05))
+    ) +
+    
+    labs(
+      title = formulation,
+      x = "Diameter (d.nm)",
+      y = "Intensity (%)"
+    ) +
+    
+    theme_classic(base_size = 14) +
+    
+    theme(
+      plot.title = element_text(
+        size = 16,
+        face = "bold",
+        hjust = 0.5
+      ),
+      
+      axis.title = element_text(
+        size = 14,
+        face = "bold"
+      ),
+      
+      axis.text = element_text(
+        size = 12,
+        colour = "black"
+      )
+    )
+  
+  plots[[formulation]] <- p
+  
+  print(p)
+}
